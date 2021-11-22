@@ -1,2 +1,13 @@
 For choosing the main datastructure as std::unordered_map
-_We don't have to perform sorting on the datastructure, so I used 
+_I implemented the towns as a struct, that has all the needed information (ID, name, Coordinate, tax, total net tax, vassals, and master). These towns are then stored inside a std::unordered_map as the main data structure.
+_We don't have to perform sorting on the data structure, so I used std::unordered_map. As a hash table, on average, it has O(1) for search, insertion, and deletion. This way, for all the get() functions, it just needs to find a town with the given ID and return the value it needs so that almost all of them has a O(1) time complexity.
+_For the vassals and the masters, I used pointers to point to the corresponding towns. If a town has a master, it has a pointer points to that master town. If a town has multiple vassals, it has a vector storing all the pointers that point to the vassals. I use pointers instead of just storing IDs because, with points we don't have to use std::find() in the data structure to access the town we are looking for, but we can access it directly using its pointer.
+_When wanting to sort towns based on distance, I created another std::multimap as a global variable with the distance as the key and the town ID as value. Because sometimes, some towns can have the same distance to a point so a multimap would work best as it can have duplicated keys. When needing the max, min, or all town in increasing distance, I just need to return the ID.
+
+For the vassals, masters, and tax stuffs:
+_When adding the vassal-master relationship, I implemented a level system to keep track of the vassal path of the vassal system. With it, all the nodes of the vassal tree will have its level, and using this level system, we can travers downward in a tree to find the longest vassal path. Utilizing this instead of i.e., BFS or DFS, we don't have to travers the whole tree but just one branch that is longest.
+_The idea is, when we have a master-vassals relationship, the level of the master = sums of (leve of each vassal + 1). And in the vassal tree, all the leaves (towns without vassals) will have its level as 0.
+_The levels of the system is updated everytime a new vassal is added into the vassal tree. Basically, all the masters of the vassal added will have their level modified.
+_Same concept with the total net tax of each town. The way I implemented my program, instead of finding the total net tax of the town in the total_net_tax() function, I update all the total net tax of each towns (if neccessary) whenever I add a new vassal into the vassal system. Same concept with the level update: traversing upward, and calculating the total net tax of all the master towns.
+_The remove() works like the add vassalship, but in reverse. It also update the global distance_from_origin multimap.
+
