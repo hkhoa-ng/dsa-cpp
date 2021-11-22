@@ -46,16 +46,18 @@ unsigned int Datastructures::town_count()
 
 void Datastructures::clear_all()
 {
+    distance_from_origin.clear();
     return dataset.clear();
 }
 
 bool Datastructures::add_town(TownID id, const Name & name, Coord coord, int tax)
 {
     if (dataset.find(id) == dataset.end()) {
-        int dist = floor(sqrt(coord.x*coord.x + coord.y*coord.y));
+        int dist = floor(sqrt(pow(coord.x, 2) + pow(coord.y, 2)));
         float total_net_tax = tax;
         struct Town new_town = {id, name, coord, tax, total_net_tax, dist};
         dataset[id] = new_town;
+        distance_from_origin.insert({dist, id});
         return true;
     }
     return false;
@@ -118,12 +120,10 @@ std::vector<TownID> Datastructures::towns_alphabetically()
 {
     std::multimap<Name, TownID> all_towns_name_ordered;
     for (auto it = dataset.begin(); it != dataset.end(); it++) {
-        // O(N)
         all_towns_name_ordered.insert({it->second._name, it->first});
     }
     std::vector<TownID> ordered_id;
     for (auto it = all_towns_name_ordered.begin(); it != all_towns_name_ordered.end(); it++) {
-        // O(N)
         ordered_id.push_back(it->second);
     }
     return ordered_id;
@@ -131,13 +131,8 @@ std::vector<TownID> Datastructures::towns_alphabetically()
 
 std::vector<TownID> Datastructures::towns_distance_increasing()
 {
-    std::multimap<int, TownID> all_towns_dist_ordered;
-    for (auto it = dataset.begin(); it != dataset.end(); it++) {
-        // O(N)
-        all_towns_dist_ordered.insert({it->second._distance, it->first});
-    }
     std::vector<TownID> ordered_id;
-    for (auto it = all_towns_dist_ordered.begin(); it != all_towns_dist_ordered.end(); it++) {
+    for (auto it = distance_from_origin.begin(); it != distance_from_origin.end(); it++) {
         // O(N)
         ordered_id.push_back(it->second);
     }
@@ -146,28 +141,18 @@ std::vector<TownID> Datastructures::towns_distance_increasing()
 
 TownID Datastructures::min_distance()
 {
-    std::multimap<int, TownID> all_towns_dist_ordered;
-    for (auto const& pair : dataset) {
-        // O(N)
-        all_towns_dist_ordered.insert({pair.second._distance, pair.first});
-    }
-    if (all_towns_dist_ordered.empty())  {
+    if (distance_from_origin.empty())  {
         return NO_TOWNID;
     }
-    return all_towns_dist_ordered.begin()->second;
+    return distance_from_origin.begin()->second;
 }
 
 TownID Datastructures::max_distance()
 {
-    std::multimap<int, TownID> all_towns_dist_ordered;
-    for (auto const& pair : dataset) {
-        // O(N)
-        all_towns_dist_ordered.insert({pair.second._distance, pair.first});
-    }
-    if (all_towns_dist_ordered.empty())  {
+    if (distance_from_origin.empty())  {
         return NO_TOWNID;
     }
-    return all_towns_dist_ordered.rbegin()->second;
+    return (distance_from_origin.rbegin())->second;
 }
 
 bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
@@ -262,6 +247,12 @@ bool Datastructures::remove_town(TownID id)
 {
     if (dataset.find(id) == dataset.end()) {
         return false;
+    }
+    for (auto it = distance_from_origin.begin(); it != distance_from_origin.end(); ++it) {
+        if (it->second == id) {
+            distance_from_origin.erase(it);
+            break;
+        }
     }
     auto removed_ptr = &dataset[id];
     // Get the master of the removed town (if any). If the removed town doesn't
