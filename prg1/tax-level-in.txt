@@ -1,0 +1,30 @@
+#test lvl as tax
+add_town Slo Salo (30,30) 53188
+add_town Nnl Naantali (20,20) 19124
+add_town Keu Keuruu (50,60) 9953
+add_town Rma Rauma (20,40) 39612
+add_town Hki Helsinki (50,20) 642045
+add_town Par Parikkala (90,50) 5030
+add_town Lr Lappeenranta (80,50) 72685
+add_town Hma Hamina (70,30) 20554
+add_town Tpe Tampere (40,40) 230537
+add_vassalship Hki Tpe
+add_vassalship Rma Tpe
+add_vassalship Keu Par
+add_vassalship Par Lr
+add_vassalship Hma Hki
+add_vassalship Lr Hma
+add_vassalship Nnl Slo
+add_vassalship Slo Hki
+longest_vassal_path Lr
+longest_vassal_path Tpe
+longest_vassal_path Rma
+total_net_tax Hki
+total_net_tax Tpe
+total_net_tax Rma
+total_net_tax Slo
+total_net_tax Nnl
+total_net_tax Hma
+total_net_tax Lr
+total_net_tax Par
+total_net_tax Keu

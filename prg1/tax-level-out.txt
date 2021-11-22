@@ -1,0 +1,68 @@
+> #test lvl as tax
+Unknown command!
+> add_town Slo Salo (30,30) 53188
+Salo: tax=53188, pos=(30,30), id=Slo
+> add_town Nnl Naantali (20,20) 19124
+Naantali: tax=19124, pos=(20,20), id=Nnl
+> add_town Keu Keuruu (50,60) 9953
+Keuruu: tax=9953, pos=(50,60), id=Keu
+> add_town Rma Rauma (20,40) 39612
+Rauma: tax=39612, pos=(20,40), id=Rma
+> add_town Hki Helsinki (50,20) 642045
+Helsinki: tax=642045, pos=(50,20), id=Hki
+> add_town Par Parikkala (90,50) 5030
+Parikkala: tax=5030, pos=(90,50), id=Par
+> add_town Lr Lappeenranta (80,50) 72685
+Lappeenranta: tax=72685, pos=(80,50), id=Lr
+> add_town Hma Hamina (70,30) 20554
+Hamina: tax=20554, pos=(70,30), id=Hma
+> add_town Tpe Tampere (40,40) 230537
+Tampere: tax=230537, pos=(40,40), id=Tpe
+> add_vassalship Hki Tpe
+Added vassalship: Helsinki -> Tampere
+> add_vassalship Rma Tpe
+Added vassalship: Rauma -> Tampere
+> add_vassalship Keu Par
+Added vassalship: Keuruu -> Parikkala
+> add_vassalship Par Lr
+Added vassalship: Parikkala -> Lappeenranta
+> add_vassalship Hma Hki
+Added vassalship: Hamina -> Helsinki
+> add_vassalship Lr Hma
+Added vassalship: Lappeenranta -> Hamina
+> add_vassalship Nnl Slo
+Added vassalship: Naantali -> Salo
+> add_vassalship Slo Hki
+Added vassalship: Salo -> Helsinki
+> longest_vassal_path Lr
+1. Lappeenranta
+2. Parikkala
+3. Keuruu
+> longest_vassal_path Tpe
+1. Tampere
+2. Helsinki
+3. Hamina
+4. Lappeenranta
+5. Parikkala
+6. Keuruu
+> longest_vassal_path Rma
+Rauma
+> total_net_tax Hki
+Total net tax of Helsinki: 585309
+> total_net_tax Tpe
+Total net tax of Tampere: 299531
+> total_net_tax Rma
+Total net tax of Rauma: 35651
+> total_net_tax Slo
+Total net tax of Salo: 49590
+> total_net_tax Nnl
+Total net tax of Naantali: 17212
+> total_net_tax Hma
+Total net tax of Hamina: 25094
+> total_net_tax Lr
+Total net tax of Lappeenranta: 65958
+> total_net_tax Par
+Total net tax of Parikkala: 5423
+> total_net_tax Keu
+Total net tax of Keuruu: 8958
+> quit

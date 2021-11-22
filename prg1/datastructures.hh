@@ -14,6 +14,8 @@
 #include <limits>
 #include <functional>
 #include <exception>
+#include <unordered_map>
+#include <map>
 
 // Types for IDs
 using TownID = std::string;
@@ -95,91 +97,103 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     unsigned int town_count();
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     void clear_all();
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     bool add_town(TownID id, Name const& name, Coord coord, int tax);
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     Name get_town_name(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     Coord get_town_coordinates(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: average O(1), worst case O(logN)
     // Short rationale for estimate:
     int get_town_tax(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: O(N) armortized
     // Short rationale for estimate:
     std::vector<TownID> all_towns();
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> find_towns(Name const& name);
 
-    // Estimate of performance:
+    // Estimate of performance: O(1)
     // Short rationale for estimate:
     bool change_town_name(TownID id, Name const& newname);
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> towns_alphabetically();
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> towns_distance_increasing();
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     TownID min_distance();
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     TownID max_distance();
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     bool add_vassalship(TownID vassalid, TownID masterid);
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> get_town_vassals(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> taxer_path(TownID id);
 
     // Non-compulsory phase 1 operations
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     bool remove_town(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: O(NlogN)
     // Short rationale for estimate:
     std::vector<TownID> towns_nearest(Coord coord);
 
-    // Estimate of performance:
+    // Estimate of performance: O(N)
     // Short rationale for estimate:
     std::vector<TownID> longest_vassal_path(TownID id);
 
-    // Estimate of performance:
+    // Estimate of performance: O(1)
     // Short rationale for estimate:
     int total_net_tax(TownID id);
 
 private:
     // Add stuff needed for your class implementation here
-
+    struct Town {
+        TownID _id;
+        Name _name;
+        Coord _coord;
+        int _tax;
+        float _total_net_tax;
+        int _distance;
+        Town* _master = nullptr;
+        std::vector<Town*> _vassal = {};
+        int _level = 0;
+        std::vector<int> _levels_of_vassals = {};
+    };
+    std::unordered_map<TownID, Town> dataset;
 };
 
 #endif // DATASTRUCTURES_HH
