@@ -97,86 +97,89 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: constant
+    // Short rationale for estimate: unordered_map::size() has constant time complexity
     unsigned int town_count();
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: linear in the number of towns
+    // Short rationale for estimate: unordered_map::clear() has linear time complexity depends on the number of elements
     void clear_all();
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: average constant, worst case logarithmic
+    // Short rationale for estimate: unordered_map::insert() has constant time. Worst case happens when the size of the
+    // unordered_map has to be increased
     bool add_town(TownID id, Name const& name, Coord coord, int tax);
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: average constant, worst case linear on the size of container
+    // Short rationale for estimate: unordered_map::find() has constant time. Worst case happen when the find key doesn't exist in map
     Name get_town_name(TownID id);
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: average constant, worst case linear on the size of container
+    // Short rationale for estimate: unordered_map::find() has constant time. Worst case happen when the find key doesn't exist in map
     Coord get_town_coordinates(TownID id);
 
-    // Estimate of performance: average O(1), worst case O(logN)
-    // Short rationale for estimate:
+    // Estimate of performance: unordered_map::find() has constant time. Worst case happen when the find key doesn't exist in map
+    // Short rationale for estimate: unordered_map::find() has constant time. Worst case happen when the find key doesn't exist in map
     int get_town_tax(TownID id);
 
-    // Estimate of performance: O(N) armortized
-    // Short rationale for estimate:
+    // Estimate of performance: armortized linear
+    // Short rationale for estimate: for loop: linear with vector::push_back: armotized constant inside the loop
     std::vector<TownID> all_towns();
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: armortized linear
+    // Short rationale for estimate: for loop: linear with vector::push_back: armotized constant inside the loop
     std::vector<TownID> find_towns(Name const& name);
 
-    // Estimate of performance: O(1)
-    // Short rationale for estimate:
+    // Estimate of performance: constant on average, worst case linear with container size
+    // Short rationale for estimate: unordered_map::find and unordered_map::at has constant time.
+    // Worst case happen when find key doesn't exist in container
     bool change_town_name(TownID id, Name const& newname);
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: linearithmic in the size of the container.
+    // Short rationale for estimate: for loop: linear, multimap::insert() in every loop: logarithmic
     std::vector<TownID> towns_alphabetically();
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: linear
+    // Short rationale for estimate: for loop, then vector::push_back in constant time
     std::vector<TownID> towns_distance_increasing();
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: constant time
+    // Short rationale for estimate: return only
     TownID min_distance();
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: constant time
+    // Short rationale for estimate: return only
     TownID max_distance();
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: best case linear, worst case quadratic time
+    // Short rationale for estimate: while loop, std::distance() runs in linear, or constant time in best case
     bool add_vassalship(TownID vassalid, TownID masterid);
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: linear
+    // Short rationale for estimate: for loop linear, inside vector::push_back() in constant time
     std::vector<TownID> get_town_vassals(TownID id);
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: linear
+    // Short rationale for estimate: for loop linear, inside vector::push_back() in constant time
     std::vector<TownID> taxer_path(TownID id);
 
     // Non-compulsory phase 1 operations
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: best case linear, worst case quadratic time
+    // Short rationale for estimate: while loop, std::distance() runs in linear, or constant time in best case
     bool remove_town(TownID id);
 
-    // Estimate of performance: O(NlogN)
-    // Short rationale for estimate:
+    // Estimate of performance: linearithmic in the size of container
+    // Short rationale for estimate: for loop has linear time, each loop multimap::insert() logarithmic time
     std::vector<TownID> towns_nearest(Coord coord);
 
-    // Estimate of performance: O(N)
-    // Short rationale for estimate:
+    // Estimate of performance: quadratic, linear in best case when town has 0 to 1 vassal
+    // Short rationale for estimate: while loop linear, with std::max_element() has time max{N-1, 0},
+    // where N = std::distance(first, last)
     std::vector<TownID> longest_vassal_path(TownID id);
 
-    // Estimate of performance: O(1)
-    // Short rationale for estimate:
+    // Estimate of performance: constant
+    // Short rationale for estimate: multimap::at in const, and then return
     int total_net_tax(TownID id);
 
 private:
@@ -194,6 +197,7 @@ private:
         std::vector<int> _levels_of_vassals = {};
     };
     std::unordered_map<TownID, Town> dataset;
+    std::multimap<int, TownID> distance_from_origin;
 };
 
 #endif // DATASTRUCTURES_HH
