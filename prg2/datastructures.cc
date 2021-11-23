@@ -381,34 +381,70 @@ int Datastructures::total_net_tax(TownID id)
 void Datastructures::clear_roads()
 {
     // Replace the line below with your implementation
-    throw NotImplemented("clear_roads()");
+    //throw NotImplemented("clear_roads()");
+    all_town_roads.clear();
+    for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
+        iter->second._roads_to_neighbor.clear();
+    }
 }
 
 std::vector<std::pair<TownID, TownID>> Datastructures::all_roads()
 {
     // Replace the line below with your implementation
-    throw NotImplemented("all_roads()");
+    //throw NotImplemented("all_roads()");
+    return all_town_roads;
 }
 
-bool Datastructures::add_road(TownID /*town1*/, TownID /*town2*/)
+bool Datastructures::add_road(TownID town1, TownID town2)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_road()");
+    //throw NotImplemented("add_road()");
+    std::pair<TownID, TownID> search_key;
+    if (town1 < town2) {
+        search_key = std::make_pair(town1, town2);
+    } else {
+        search_key = std::make_pair(town2, town1);
+    }
+    if (dataset.find(town1) == dataset.end() || dataset.find(town2) == dataset.end() ||
+            std::find(all_town_roads.begin(), all_town_roads.end(), search_key) != all_town_roads.end()) {
+        return false;
+    }
+    all_town_roads.push_back(search_key);
+    Coord town1_coord = dataset[town1]._coord;
+    Coord town2_coord = dataset[town2]._coord;
+    Town* ptr_to_town1 = &dataset[town1];
+    Town* ptr_to_town2 = &dataset[town2];
+    int distance = std::floor(std::sqrt(std::pow(town1_coord.x - town2_coord.x, 2) + std::pow(town1_coord.y - town2_coord.y, 2)));
+    dataset[town1]._roads_to_neighbor.insert({ptr_to_town2, distance});
+    dataset[town2]._roads_to_neighbor.insert({ptr_to_town1, distance});
+    return true;
 }
 
-std::vector<TownID> Datastructures::get_roads_from(TownID /*id*/)
+std::vector<TownID> Datastructures::get_roads_from(TownID id)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_roads_from()");
+    //throw NotImplemented("get_roads_from()");
+    std::vector<TownID> all_roads_from;
+    auto const& roads_to_neighbor = dataset[id]._roads_to_neighbor;
+    for (auto iter = roads_to_neighbor.begin(); iter != roads_to_neighbor.end(); ++iter) {
+        all_roads_from.push_back(iter->first->_id);
+    }
+    return all_roads_from;
 }
 
-std::vector<TownID> Datastructures::any_route(TownID /*fromid*/, TownID /*toid*/)
+std::vector<TownID> Datastructures::any_route(TownID fromid, TownID toid)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("any_route()");
+    //throw NotImplemented("any_route()");
+    std::vector<TownID> results;
+    if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    return results;
 }
 
 bool Datastructures::remove_road(TownID /*town1*/, TownID /*town2*/)
