@@ -10,6 +10,7 @@
 #include <random>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -444,21 +445,128 @@ std::vector<TownID> Datastructures::any_route(TownID fromid, TownID toid)
         results = {NO_TOWNID};
         return results;
     }
+    // Using DFS to find a
+    // First, reset all the search variable for the towns
+    for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
+        iter->second._state = NOT_VISITED;    // White = not visited
+        iter->second._parent = nullptr;
+    }
+    // Create a stack to keep track of town for searching
+    std::stack<Town*> town_ptrs_stack;
+    // Add root town to the stack
+    town_ptrs_stack.push(&dataset[fromid]);
+    // Loop through the stack as long as it isn't empty
+    while (!town_ptrs_stack.empty()) {
+        // Get the top element as current, marked it as visited and remove it
+        Town* current_town =town_ptrs_stack.top();
+        current_town->_state = VISITED;   // Black = visited
+        town_ptrs_stack.pop();
+        // For every non visited adj. town of the current town, if it's the goal town, return
+        // If not, add it to the stack. Update its parent to the current town
+        for (auto iter = current_town->_roads_to_neighbor.begin(); iter != current_town->_roads_to_neighbor.end();  ++iter) {
+            // If the adjacent town is not visited
+            if (iter->first->_state == NOT_VISITED) {
+                // Update its parent
+                iter->first->_parent = current_town;
+                // If the town is the same as goal, found a path, break
+                //if (iter->first->_id == toid) {
+                //    break;
+                //}
+                town_ptrs_stack.push(iter->first);
+            }
+        }
+    }
+    // Backtrack from the goal town: if it doesn't have a parent, a path is not found. If it does, found a path
+    if (dataset[toid]._parent == nullptr) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    //std::vector<TownID> path_from_goal_to_source;
+    Town* current_town = &dataset[toid];
+    while (true) {
+        results.insert(results.begin(), current_town->_id);
+        current_town = current_town->_parent;
+        if (current_town == nullptr) { break; }
+    }
+
+
     return results;
 }
 
-bool Datastructures::remove_road(TownID /*town1*/, TownID /*town2*/)
+bool Datastructures::remove_road(TownID town1, TownID town2)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("remove_road()");
+    //throw NotImplemented("remove_road()");
+    std::pair<TownID, TownID> search_key;
+    if (town1 < town2) {
+        search_key = std::make_pair(town1, town2);
+    } else {
+        search_key = std::make_pair(town2, town1);
+    }
+    if (dataset.find(town1) == dataset.end() || dataset.find(town2) == dataset.end() ||
+            std::find(all_town_roads.begin(), all_town_roads.end(), search_key) == all_town_roads.end()) {
+        return false;
+    }
+    all_town_roads.erase(std::find(all_town_roads.begin(), all_town_roads.end(), search_key));
+    dataset[town1]._roads_to_neighbor.erase(dataset[town1]._roads_to_neighbor.find(&dataset[town2]));
+    dataset[town2]._roads_to_neighbor.erase(dataset[town2]._roads_to_neighbor.find(&dataset[town1]));
+    return true;
 }
 
-std::vector<TownID> Datastructures::least_towns_route(TownID /*fromid*/, TownID /*toid*/)
+std::vector<TownID> Datastructures::least_towns_route(TownID fromid, TownID toid)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("least_towns_route()");
+    //throw NotImplemented("least_towns_route()");
+    std::vector<TownID> results;
+    if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    // Using BFS to find route with the smallest number of towns
+    // First, reset all the search variable for the towns
+    for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
+        iter->second._state = NOT_VISITED;
+        iter->second._parent = nullptr;
+    }
+    // Create a stack to keep track of town for searching
+    std::queue<Town*> town_ptrs_queue;
+    // Add root town to the queue
+    town_ptrs_queue.push(&dataset[fromid]);
+    // Set the source town to visited
+    dataset[fromid]._state = VISITED;
+    // Loop through the queue as long as it  isn't empty
+    while (!town_ptrs_queue.empty()) {
+        // Get the top element as current, remove it
+        Town* current_town =town_ptrs_queue.front();
+        town_ptrs_queue.pop();
+        // For every non visited adj. town of the current town, if it's the goal town, return
+        // If not, add it to the stack. Update its parent to the current town
+        for (auto adj_town_of_current = current_town->_roads_to_neighbor.begin();
+             adj_town_of_current != current_town->_roads_to_neighbor.end();  ++adj_town_of_current) {
+            // If the adjacent town is not visited
+            if (adj_town_of_current->first->_state == NOT_VISITED) {
+                // Update its parent
+                adj_town_of_current->first->_parent = current_town;
+                town_ptrs_queue.push(adj_town_of_current->first);
+                adj_town_of_current->first->_state = VISITED;
+            }
+        }
+    }
+    // Backtrack from the goal town: if it doesn't have a parent, a path is not found. If it does, found a path
+    if (dataset[toid]._parent == nullptr) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    //std::vector<TownID> path_from_goal_to_source;
+    Town* current_town = &dataset[toid];
+    while (true) {
+        results.insert(results.begin(), current_town->_id);
+        current_town = current_town->_parent;
+        if (current_town == nullptr) { break; }
+    }
+    return results;
 }
 
 std::vector<TownID> Datastructures::road_cycle_route(TownID /*startid*/)

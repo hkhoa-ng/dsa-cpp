@@ -16,6 +16,8 @@
 #include <exception>
 #include <unordered_map>
 #include <map>
+#include <stack>
+#include <queue>
 
 // Types for IDs
 using TownID = std::string;
@@ -228,7 +230,11 @@ public:
 
 
 private:
-    // Add stuff needed for your class implementation here
+    // Add stuff needed for your class implementation
+    // White = not visited
+    // Black = visited
+    enum Color {WHITE, GRAY, BLACK};
+    enum State {VISITED, NOT_VISITED};
     struct Town {
         TownID _id;
         Name _name;
@@ -240,9 +246,15 @@ private:
         std::vector<Town*> _vassal = {};
         int _level = 0;
         std::vector<int> _levels_of_vassals = {};
+        std::unordered_map<Town*, int> _roads_to_neighbor ={};
+        Color _color = BLACK;
+        State _state = NOT_VISITED;
+        Town* _parent = nullptr;
     };
     std::unordered_map<TownID, Town> dataset;
     std::multimap<int, TownID> distance_from_origin;
+    //std::unordered_map<std::pair<TownID, TownID>, int> all_town_roads;
+    std::vector<std::pair<TownID, TownID>> all_town_roads;
 };
 
 #endif // DATASTRUCTURES_HH
