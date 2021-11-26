@@ -19,6 +19,7 @@
 #include <stack>
 #include <queue>
 
+
 // Types for IDs
 using TownID = std::string;
 using Name = std::string;
@@ -31,6 +32,9 @@ int const NO_VALUE = std::numeric_limits<int>::min();
 
 // Return value for cases where name values were not found
 Name const NO_NAME = "!!NO_NAME!!";
+
+// A very big number for Dijkstra
+int const MAX_DISTANCE = 1000000000;
 
 // Type for a coordinate (x, y)
 struct Coord
@@ -250,11 +254,20 @@ private:
         Color _color = BLACK;
         State _state = NOT_VISITED;
         Town* _parent = nullptr;
+        int _distance_from_root = MAX_DISTANCE;
     };
     std::unordered_map<TownID, Town> dataset;
     std::multimap<int, TownID> distance_from_origin;
     //std::unordered_map<std::pair<TownID, TownID>, int> all_town_roads;
     std::vector<std::pair<TownID, TownID>> all_town_roads;
+
+    struct dereference_compare_node : public std::binary_function<Town*, Town*, bool>
+    {
+        bool operator()(const Town* lhs, const Town* rhs) const
+        {
+            return lhs->_distance_from_root > rhs->_distance_from_root;
+        }
+    };
 };
 
 #endif // DATASTRUCTURES_HH

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <functional>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -393,6 +394,7 @@ std::vector<std::pair<TownID, TownID>> Datastructures::all_roads()
 {
     // Replace the line below with your implementation
     //throw NotImplemented("all_roads()");
+    //return std::sort(all_town_roads.begin(), all_town_roads.end());
     return all_town_roads;
 }
 
@@ -432,6 +434,7 @@ std::vector<TownID> Datastructures::get_roads_from(TownID id)
     for (auto iter = roads_to_neighbor.begin(); iter != roads_to_neighbor.end(); ++iter) {
         all_roads_from.push_back(iter->first->_id);
     }
+    //return std::sort(all_roads_from.begin(), all_roads_from.end());
     return all_roads_from;
 }
 
@@ -576,11 +579,68 @@ std::vector<TownID> Datastructures::road_cycle_route(TownID /*startid*/)
     throw NotImplemented("road_cycle_route()");
 }
 
-std::vector<TownID> Datastructures::shortest_route(TownID /*fromid*/, TownID /*toid*/)
+std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
 {
     // Replace the line below with your implementation
     // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("shortest_route()");
+    //throw NotImplemented("shortest_route()");
+    std::vector<TownID> results;
+    if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    // Using Dijkstra's algorithm to find the shortest route
+    // First, reset all the search variable for the towns
+    for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
+        iter->second._state = NOT_VISITED;
+        iter->second._parent = nullptr;
+        iter->second._distance_from_root = MAX_DISTANCE;
+    }
+    // Assign distance from root of root node to 0 (root's distance to itself is 0)
+    dataset[fromid]._distance_from_root = 0;
+    std::priority_queue<Town*, std::vector<Town*>, dereference_compare_node> town_ptrs_prior_queue;
+    town_ptrs_prior_queue.push(&dataset[fromid]);
+    // Looping through the queue as long as it's not empty
+    while (!town_ptrs_prior_queue.empty()){
+        // Choose node with min distance from root
+        Town* current_town = town_ptrs_prior_queue.top();
+        // Remove it from queue, and marked it as visited
+        current_town->_state = VISITED;
+        town_ptrs_prior_queue.pop();
+        // If the current node is the goal node, stop the loop
+        if (current_town->_id == toid)  {
+            // Denote parent to backtrack
+            //current_town->_parent = prev_parrent;
+            break;
+        }
+        // For every neigbor town of current town
+        for (auto& adj_town_of_current : current_town->_roads_to_neighbor) {
+            // If this neigbor is visited, skip this iteration
+            if (adj_town_of_current.first->_state == VISITED) { continue; }
+            int distance_from_current_to_this_child = adj_town_of_current.second;
+            int temp_distance = current_town->_distance_from_root + distance_from_current_to_this_child;
+            if (temp_distance < adj_town_of_current.first->_distance_from_root) {
+                // A shorter path is found
+                adj_town_of_current.first->_distance_from_root = temp_distance;
+                // Push Town to prior queue
+                town_ptrs_prior_queue.push(adj_town_of_current.first);
+                // Denote parent to backtrack
+                adj_town_of_current.first->_parent = current_town;
+            }
+        }
+    }
+    // Backtrack from the goal town: if it doesn't have a parent, a path is not found. If it does, found a path
+    if (dataset[toid]._parent == nullptr) {
+        results = {NO_TOWNID};
+        return results;
+    }
+    Town* current_town = &dataset[toid];
+    while (true) {
+        results.insert(results.begin(), current_town->_id);
+        current_town = current_town->_parent;
+        if (current_town == nullptr) { break; }
+    }
+    return results;
 }
 
 Distance Datastructures::trim_road_network()
