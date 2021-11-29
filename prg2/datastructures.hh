@@ -33,9 +33,6 @@ int const NO_VALUE = std::numeric_limits<int>::min();
 // Return value for cases where name values were not found
 Name const NO_NAME = "!!NO_NAME!!";
 
-// A very big number for Dijkstra
-int const MAX_DISTANCE = 1000000000;
-
 // Type for a coordinate (x, y)
 struct Coord
 {
@@ -235,27 +232,30 @@ public:
 
 private:
     // Add stuff needed for your class implementation
-    // White = not visited
-    // Black = visited
-    enum Color {WHITE, GRAY, BLACK};
-    enum State {VISITED, NOT_VISITED};
+    enum State {VISITED, BEING_VISITED, NOT_VISITED};
     struct Town {
         TownID _id;
         Name _name;
         Coord _coord;
         int _tax;
         float _total_net_tax;
-        int _distance;
+        Distance _distance;
         Town* _master = nullptr;
         std::vector<Town*> _vassal = {};
         int _level = 0;
         std::vector<int> _levels_of_vassals = {};
         std::unordered_map<Town*, int> _roads_to_neighbor ={};
-        Color _color = BLACK;
         State _state = NOT_VISITED;
         Town* _parent = nullptr;
-        int _distance_from_root = MAX_DISTANCE;
+        int _weight = INT_MAX;
+        Distance _distance_from_root = INT_MAX;
     };
+    struct Road {
+        TownID _from;
+        TownID _to;
+        int _distance;
+    };
+
     std::unordered_map<TownID, Town> dataset;
     std::multimap<int, TownID> distance_from_origin;
     //std::unordered_map<std::pair<TownID, TownID>, int> all_town_roads;
@@ -265,9 +265,10 @@ private:
     {
         bool operator()(const Town* lhs, const Town* rhs) const
         {
-            return lhs->_distance_from_root > rhs->_distance_from_root;
+            return lhs->_weight > rhs->_weight;
         }
     };
+
 };
 
 #endif // DATASTRUCTURES_HH
