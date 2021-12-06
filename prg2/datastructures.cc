@@ -574,9 +574,6 @@ std::vector<TownID> Datastructures::least_towns_route(TownID fromid, TownID toid
 
 std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("road_cycle_route()");
     std::vector<TownID> results;
     if (dataset.find(startid) == dataset.end()) {
         results = {NO_TOWNID};
@@ -588,54 +585,48 @@ std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
         iter->second._state = NOT_VISITED;
         iter->second._parent = nullptr;
     }
-    // Last town in cycle
-    Town* last_town_in_cycle = nullptr;
-    // Create a flag to see if cycle can form
-    bool can_form_cycle = false;
-    // Create a stack to keep track of town for searching
-    std::stack<Town*> town_ptrs_stack;
-    // Add root town to the stack
-    town_ptrs_stack.push(&dataset[startid]);
-    // Loop through the stack as long as it isn't empty
-    while (!town_ptrs_stack.empty()) {
-        // Get the top element as current
-        Town* current_town =town_ptrs_stack.top();
-        town_ptrs_stack.pop();
-        if (current_town->_state == VISITED) { break; }
-        if (current_town->_state == BEING_VISITED) {
+    std::stack<std::pair<TownID, TownID>> dfs_stack;
+    // Towns will be stored in pairs as town-parent in the stack
+    dfs_stack.push(make_pair(startid, NO_TOWNID));
+    dataset[startid]._state = VISITED;
+    // Store last town in cycle
+    TownID last_town;
+    TownID overlap_town;
 
+    while (!dfs_stack.empty()) {
+        TownID current = dfs_stack.top().first;
+        TownID current_parent = dfs_stack.top().second;
+        if (current_parent != NO_TOWNID) {
+            dataset[current]._parent = &dataset[current_parent];
         }
-        current_town->_state = BEING_VISITED;
-        town_ptrs_stack.push(current_town);
-        // For every non visited adj. town of the current town, if it's the goal town, return
-        // If not, add it to the stack. Update its parent to the current town
-        for (auto child_of_current = current_town->_roads_to_neighbor.begin(); child_of_current != current_town->_roads_to_neighbor.end();  ++child_of_current) {
-            // If the adjacent town is not visited
-            if (child_of_current->first->_state == NOT_VISITED) {
-                // Update its parent
-                child_of_current->first->_parent = current_town;
-                town_ptrs_stack.push(child_of_current->first);
-            } else if (child_of_current->first->_state == BEING_VISITED) {
-                // Found a cycle
-                can_form_cycle = true;
-                // Update its parent
-                child_of_current->first->_parent = current_town;
-                last_town_in_cycle = child_of_current->first;
-                break;
+        dfs_stack.pop();
+        const auto& edges = dataset[current]._roads_to_neighbor;
+        for (auto it = edges.begin(); it != edges.end(); it++) {
+            Town* neighbor = it->first;
+            if (neighbor->_state != VISITED) {
+                dfs_stack.push(make_pair(neighbor->_id, current));
+                neighbor->_state = VISITED;
+                continue;
+            } else if (neighbor->_id != current_parent) {
+                std::cout << "Found cycle!" << std::endl;
+                last_town = neighbor->_id;
+                dataset[last_town]._parent = &dataset[current];
+                // Find the overlap town in the loop (town start/end the cycle)
+                for (auto const& edge : dataset[last_town]._roads_to_neighbor) {
+                    if (edge.first->_state == VISITED && edge.first->_id != current) { overlap_town = edge.first->_id; }
+                }
+                goto stop;
             }
         }
-
-        current_town->_state = VISITED;
     }
-    if (!can_form_cycle) {
-        results = {NO_TOWNID};
-        return results;
-    }
-    // Back track to form the cycle
+    stop:
+    // Backtrack to form cycle
+    results.insert(results.begin(), overlap_town);
+    Town* current_town = &dataset[last_town];
     while (true) {
-        results.insert(results.begin(), last_town_in_cycle->_id);
-        last_town_in_cycle = last_town_in_cycle->_parent;
-        if (last_town_in_cycle == nullptr) { break; }
+        results.insert(results.begin(), current_town->_id);
+        current_town = current_town->_parent;
+        if (current_town == nullptr) { break; }
     }
     return results;
 }
@@ -706,6 +697,8 @@ std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
 
 Distance Datastructures::trim_road_network()
 {
+    // Keep track of which town has been processed by the Prim's algorithm
+    std::vector<TownID> not_processed_towns = all_towns();
     // Replace the line below with your implementation
     //throw NotImplemented("trim_road_network()");
     Distance result = 0;
@@ -716,50 +709,71 @@ Distance Datastructures::trim_road_network()
         iter->second._parent = nullptr;
         iter->second._weight = INT_MAX;
     }
-    // Create an unordered_map to store all the roads, along with their weight for the MST
-    //std::unordered_map<std::pair<TownID, TownID>, Distance> roads_and_dist;
-    std::vector<std::pair<TownID, TownID>> MST_roads;
-    // Pick any initial town as the starting point for Prim's algorithm
-    // Let's pick the first town in the data structure
-    Town* source = &dataset.begin()->second;
-    // Set its cost (weight) as 0, since it's the source town
-    source->_weight = 0;
-    // And its parent to itself
-    source->_parent = source;
-    // Create a min priority queue, using weight source as key
-    std::priority_queue<Town*, std::vector<Town*>, dereference_compare_node> town_ptrs_prior_queue;
-    // Add source town
-    town_ptrs_prior_queue.push(source);
-    // Loop through the loop aslong as it isn't empty
-    while (!town_ptrs_prior_queue.empty()){
-        // Choose node with min distance from root
-        Town* current_town = town_ptrs_prior_queue.top();
-        // Remove it from queue, and marked it as visited
-        town_ptrs_prior_queue.pop();
-        current_town->_state = VISITED;
-        // Add the edge of that town into the MST edge
-        std::pair<TownID, TownID> edge_name;
-        if (current_town->_id < current_town->_parent->_id) {
-            edge_name = std::make_pair(current_town->_id, current_town->_parent->_id);
-        } else {
-            edge_name = std::make_pair(current_town->_parent->_id, current_town->_id);
+
+        // Create an unordered_map to store all the roads, along with their weight for the MST
+        //std::unordered_map<std::pair<TownID, TownID>, Distance> roads_and_dist;
+        std::vector<std::pair<TownID, TownID>> MST_roads;
+        // Keep on looping as long as there are not processed town
+        while (!not_processed_towns.empty()) {
+        // Pick any initial town as the starting point for Prim's algorithm
+        // Let's pick the first town in not processed town
+//         Town* source = &dataset.begin()->second;
+        Town* source = &dataset[*not_processed_towns.begin()];
+        // Set its cost (weight) as 0, since it's the source town
+        source->_weight = 0;
+        // And its parent to itself
+        source->_parent = source;
+        // Create a min priority queue, using weight source as key
+        std::priority_queue<Town*, std::vector<Town*>, dereference_compare_node> town_ptrs_prior_queue;
+        // Add source town
+        town_ptrs_prior_queue.push(source);
+        // Loop through the loop aslong as it isn't empty
+        while (!town_ptrs_prior_queue.empty()){
+            // Choose node with min distance from root
+            Town* current_town = town_ptrs_prior_queue.top();
+            // Remove it from queue, and marked it as visited
+            town_ptrs_prior_queue.pop();
+            current_town->_state = VISITED;
+            //std::cout << current_town->_name << std::endl;
+            // Add the edge of that town into the MST edge
+            std::pair<TownID, TownID> edge_name;
+            if (current_town->_id < current_town->_parent->_id) {
+                edge_name = std::make_pair(current_town->_id, current_town->_parent->_id);
+            } else {
+                edge_name = std::make_pair(current_town->_parent->_id, current_town->_id);
+            }
+            MST_roads.push_back(edge_name);
+            // For every neigbor town of current town
+            for (auto& adj_town_of_current : current_town->_roads_to_neighbor) {
+                // If this neigbor is visited, skip this iteration
+                if (adj_town_of_current.first->_state == VISITED) { continue; }
+                // Push neighbors to prior queue
+                town_ptrs_prior_queue.push(adj_town_of_current.first);
+                int distance_from_current_to_this_child = adj_town_of_current.second;
+                // Update new weight for the edge from this parent to this child, if
+                // the weight is less than the current weight
+                if (distance_from_current_to_this_child < adj_town_of_current.first->_weight) {
+                    // A shorter path is found
+                    adj_town_of_current.first->_weight = distance_from_current_to_this_child;
+                    // Denote parent
+                    adj_town_of_current.first->_parent = current_town;
+                }
+            }
         }
-        //roads_and_dist.insert({edge_name, current_town->_weight});
-        MST_roads.push_back(edge_name);
-        // For every neigbor town of current town
-        for (auto& adj_town_of_current : current_town->_roads_to_neighbor) {
-            // If this neigbor is visited, skip this iteration
-            if (adj_town_of_current.first->_state == VISITED) { continue; }
-            // Push neighbors to prior queue
-            town_ptrs_prior_queue.push(adj_town_of_current.first);
-            int distance_from_current_to_this_child = adj_town_of_current.second;
-            // Update new weight for the edge from this parent to this child, if
-            // the weight is less than the current weight
-            if (distance_from_current_to_this_child < adj_town_of_current.first->_weight) {
-                // A shorter path is found
-                adj_town_of_current.first->_weight = distance_from_current_to_this_child;
-                // Denote parent
-                adj_town_of_current.first->_parent = current_town;
+        // Check for processed roads
+        std::vector<TownID> processed_towns = {};
+        for (auto const& edge : MST_roads) {
+            if (std::find(processed_towns.begin(), processed_towns.end(), edge.first) == processed_towns.end()) {
+                processed_towns.push_back(edge.first);
+            }
+            if (std::find(processed_towns.begin(), processed_towns.end(), edge.second) == processed_towns.end()) {
+                processed_towns.push_back(edge.second);
+            }
+        }
+        // Update the processed town vector
+        for (auto const& town : processed_towns) {
+            if (std::find(not_processed_towns.begin(), not_processed_towns.end(), town) != not_processed_towns.end()) {
+                not_processed_towns.erase(std::find(not_processed_towns.begin(), not_processed_towns.end(), town));
             }
         }
     }
