@@ -49,6 +49,10 @@ unsigned int Datastructures::town_count()
 void Datastructures::clear_all()
 {
     distance_from_origin.clear();
+    all_town_roads.clear();
+    for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
+        iter->second._roads_to_neighbor.clear();
+    }
     return dataset.clear();
 }
 
@@ -575,6 +579,7 @@ std::vector<TownID> Datastructures::least_towns_route(TownID fromid, TownID toid
 std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
 {
     std::vector<TownID> results;
+    bool has_cycle = false;
     if (dataset.find(startid) == dataset.end()) {
         results = {NO_TOWNID};
         return results;
@@ -615,18 +620,21 @@ std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
                 for (auto const& edge : dataset[last_town]._roads_to_neighbor) {
                     if (edge.first->_state == VISITED && edge.first->_id != current) { overlap_town = edge.first->_id; }
                 }
+                has_cycle = true;
                 goto stop;
             }
         }
     }
     stop:
-    // Backtrack to form cycle
-    results.insert(results.begin(), overlap_town);
-    Town* current_town = &dataset[last_town];
-    while (true) {
-        results.insert(results.begin(), current_town->_id);
-        current_town = current_town->_parent;
-        if (current_town == nullptr) { break; }
+    if (has_cycle) {
+        // Backtrack to form cycle
+        results.insert(results.begin(), overlap_town);
+        Town* current_town = &dataset[last_town];
+        while (true) {
+            results.insert(results.begin(), current_town->_id);
+            current_town = current_town->_parent;
+            if (current_town == nullptr) { break; }
+        }
     }
     return results;
 }
