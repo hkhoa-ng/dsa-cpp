@@ -232,7 +232,7 @@ public:
 
 private:
     // Add stuff needed for your class implementation
-    enum State {VISITED, BEING_VISITED, NOT_VISITED};
+    enum State {VISITED, NOT_VISITED};
     struct Town {
         TownID _id;
         Name _name;
