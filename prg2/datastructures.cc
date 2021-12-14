@@ -396,17 +396,12 @@ void Datastructures::clear_roads()
 
 std::vector<std::pair<TownID, TownID>> Datastructures::all_roads()
 {
-    // Replace the line below with your implementation
-    //throw NotImplemented("all_roads()");
     std::sort(all_town_roads.begin(), all_town_roads.end());
     return all_town_roads;
 }
 
 bool Datastructures::add_road(TownID town1, TownID town2)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("add_road()");
     std::pair<TownID, TownID> search_key;
     if (town1 < town2) {
         search_key = std::make_pair(town1, town2);
@@ -430,9 +425,6 @@ bool Datastructures::add_road(TownID town1, TownID town2)
 
 std::vector<TownID> Datastructures::get_roads_from(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("get_roads_from()");
     std::vector<TownID> all_roads_from;
     auto const& roads_to_neighbor = dataset[id]._roads_to_neighbor;
     for (auto iter = roads_to_neighbor.begin(); iter != roads_to_neighbor.end(); ++iter) {
@@ -444,9 +436,6 @@ std::vector<TownID> Datastructures::get_roads_from(TownID id)
 
 std::vector<TownID> Datastructures::any_route(TownID fromid, TownID toid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("any_route()");
     std::vector<TownID> results;
     if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
         results = {NO_TOWNID};
@@ -502,9 +491,6 @@ std::vector<TownID> Datastructures::any_route(TownID fromid, TownID toid)
 
 bool Datastructures::remove_road(TownID town1, TownID town2)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("remove_road()");
     std::pair<TownID, TownID> search_key;
     if (town1 < town2) {
         search_key = std::make_pair(town1, town2);
@@ -523,9 +509,6 @@ bool Datastructures::remove_road(TownID town1, TownID town2)
 
 std::vector<TownID> Datastructures::least_towns_route(TownID fromid, TownID toid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("least_towns_route()");
     std::vector<TownID> results;
     if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
         results = {NO_TOWNID};
@@ -641,9 +624,6 @@ std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
 
 std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("shortest_route()");
     std::vector<TownID> results;
     if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
         results = {NO_TOWNID};
@@ -725,7 +705,6 @@ Distance Datastructures::trim_road_network()
         while (!not_processed_towns.empty()) {
         // Pick any initial town as the starting point for Prim's algorithm
         // Let's pick the first town in not processed town
-//         Town* source = &dataset.begin()->second;
         Town* source = &dataset[*not_processed_towns.begin()];
         // Set its cost (weight) as 0, since it's the source town
         source->_weight = 0;

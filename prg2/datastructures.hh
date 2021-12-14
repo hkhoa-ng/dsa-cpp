@@ -187,52 +187,53 @@ public:
 
     // Phase 2 operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: quadratic in the size of containers
+    // Short rationale for estimate: for loop linear, vector::clear() inside for loop linear in the size of container
     void clear_roads();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linearithmic
+    // Short rationale for estimate: std::sort() is O(NlogN)
     std::vector<std::pair<TownID, TownID>> all_roads();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linear in worst case
+    // Short rationale for estimate: std::vector::insert() linear depends on distance between pos and end
     bool add_road(TownID town1, TownID town2);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linearithmic
+    // Short rationale for estimate: for loop with vector::push_back() linear, then sort() the  vector for O(NlogN)
     std::vector<TownID> get_roads_from(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linear on average, quadratic on worst case (doesn't have any route and traverse whole graph)
+    // Short rationale for estimate: DFS, so O(V+E), or O(N). Backtrack with while loop, and vector::insert() so O(N^2)
     std::vector<TownID> any_route(TownID fromid, TownID toid);
 
     // Non-compulsory phase 2 operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linear
+    // Short rationale for estimate: vector::erase() is O(N) depend on the distance between pos and end
     bool remove_road(TownID town1, TownID town2);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linear on average, quadratic on worst case (doesn't have any route and traverse whole graph)
+    // Short rationale for estimate: BFS, so O(V+E), or O(N). Backtrack with while loop, and vector::insert() so O(N^2)
     std::vector<TownID> least_towns_route(TownID fromid, TownID toid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linear on average, quadratic on worst case (doesn't have any route and traverse whole graph)
+    // Short rationale for estimate: DFS, so O(V+E), or O(N). Backtrack with while loop, and vector::insert() so O(N^2)
     std::vector<TownID> road_cycle_route(TownID startid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: linearithmic for the algorithm, quadratic in the backtracking step
+    // Short rationale for estimate: Dijkstra's shortest path algorithm is O(ELogV). Backtrack with while loop, and vector::insert() so O(N^2)
     std::vector<TownID> shortest_route(TownID fromid, TownID toid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: quadratic
+    // Short rationale for estimate: Prim's algorithm to traverse the whole graph, so O(VE).
     Distance trim_road_network();
 
 
 private:
     // Add stuff needed for your class implementation
     enum State {VISITED, BEING_VISITED, NOT_VISITED};
+    int INT_MAX = 1000000;
     struct Town {
         TownID _id;
         Name _name;
@@ -247,8 +248,8 @@ private:
         std::unordered_map<Town*, int> _roads_to_neighbor ={};
         State _state = NOT_VISITED;
         Town* _parent = nullptr;
-        int _weight = INT_MAX;
-        Distance _distance_from_root = INT_MAX;
+        int _weight = 1000000;  // A very big number
+        Distance _distance_from_root = 1000000;
     };
     struct Road {
         TownID _from;
