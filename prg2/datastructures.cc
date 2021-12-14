@@ -624,6 +624,9 @@ std::vector<TownID> Datastructures::road_cycle_route(TownID startid)
 
 std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
 {
+    // Replace the line below with your implementation
+    // Also uncomment parameters ( /* param */ -> param )
+    //throw NotImplemented("shortest_route()");
     std::vector<TownID> results;
     if (dataset.find(fromid) == dataset.end() || dataset.find(toid) == dataset.end()) {
         results = {NO_TOWNID};
@@ -634,7 +637,7 @@ std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
     for (auto iter = dataset.begin(); iter != dataset.end(); ++iter) {
         iter->second._state = NOT_VISITED;
         iter->second._parent = nullptr;
-        iter->second._distance_from_root = INT_MAX;
+        iter->second._weight = INT_MAX;
     }
     // Assign distance from root of root node to 0 (root's distance to itself is 0)
     dataset[fromid]._weight = 0;
@@ -658,10 +661,10 @@ std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
             // If this neigbor is visited, skip this iteration
             if (adj_town_of_current.first->_state == VISITED) { continue; }
             int distance_from_current_to_this_child = adj_town_of_current.second;
-            int temp_distance = current_town->_distance_from_root + distance_from_current_to_this_child;
-            if (temp_distance < adj_town_of_current.first->_distance_from_root) {
+            int temp_distance = current_town->_weight + distance_from_current_to_this_child;
+            if (temp_distance < adj_town_of_current.first->_weight) {
                 // A shorter path is found
-                adj_town_of_current.first->_distance_from_root = temp_distance;
+                adj_town_of_current.first->_weight = temp_distance;
                 // Push Town to prior queue
                 town_ptrs_prior_queue.push(adj_town_of_current.first);
                 // Denote parent to backtrack
@@ -682,7 +685,6 @@ std::vector<TownID> Datastructures::shortest_route(TownID fromid, TownID toid)
     }
     return results;
 }
-
 Distance Datastructures::trim_road_network()
 {
     // Keep track of which town has been processed by the Prim's algorithm

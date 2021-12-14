@@ -232,12 +232,8 @@ public:
 
 private:
     // Add stuff needed for your class implementation
-<<<<<<< HEAD
-    enum State {VISITED, BEING_VISITED, NOT_VISITED};
     int INT_MAX = 1000000;
-=======
     enum State {VISITED, NOT_VISITED};
->>>>>>> 8a6f4c606388577bccd7f50dd5debd5ad50fee95
     struct Town {
         TownID _id;
         Name _name;
@@ -253,7 +249,6 @@ private:
         State _state = NOT_VISITED;
         Town* _parent = nullptr;
         int _weight = 1000000;  // A very big number
-        Distance _distance_from_root = 1000000;
     };
     struct Road {
         TownID _from;

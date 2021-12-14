@@ -1,0 +1,11 @@
+-Now for each town, I added their discovery state: VISITED or NOT_VISITED.
+-Added a parent for each town, as well as an unordered_map<Town*, int> that stores all info about the neighbors of the town. Ptrs to neighbors, and int as distance to that neighbor. 
+-Added a weight for a town that will be linked later to an edge's weight.
+-Added another global vector to store all the roads. Roads will be stored as par<TownID, TownID>.
+-Also struct to compare weights of town. This will be used later in the path finding algorithm.
+-For any_route, I used a simple DFS to traverse the graph, and marked each traversed town as VISITED, and update its parent town. Later, I can just backtrack from the destination town: if it has a parent, means a path has been found and backtrack from that. 
+-For least_towns_route, I used BFS to traverse the graph. Due to its nature, BFS will return the route with least level of traverse. Similar procedure of backtracking to any_route function.
+-For road_cycle_route, I modified the DFS used above so that it can detect cycle. And then backtracking
+-For shortest_route, I used Dijkstra's algorithm to find the shortest path. Also backtracking after the algorithm is performed to the whole graph to find the graph.
+-For trim_road_network, I used Prim's algorithm instead of Kruskal. Because I already implemented this algorithm before the exercise session where Kruskal's got introduced, so I just go with it. One thing to notice is, Prim works by choosing a starting node. If the graph has 2 seperate network of towns that are not connected, Prim's will only work on one of them. To eliminate this, I created a processed_town vector, to keep track of which towns have been processed and which not, thus eliminate this problem. Apart from that, Prim's and Kruskal should be similar. Again, perform the algorithm and then backtracking to return the networks.
+
