@@ -183,7 +183,6 @@ public:
     int total_net_tax(TownID id);
 
 private:
-    // Add stuff needed for your class implementation here
     struct Town {
         TownID _id;
         Name _name;
